@@ -169,9 +169,9 @@ details p{color:var(--muted);padding-bottom:20px}
 .book-copy p{color:var(--muted);margin-top:14px}
 .book-copy .ticks{margin:24px 0 30px}
 .book-copy .ticks li::before{content:"✓";background:rgba(47,123,255,.18);color:var(--blue2)}
-.cal-box{background:#fff;border-radius:var(--r);overflow:hidden;min-height:680px;border:1px solid var(--border)}
-.cal-box .calendly-inline-widget{min-width:280px;height:700px}
-.cal-empty{min-height:680px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+.cal-box{background:#fff;border-radius:var(--r);overflow:hidden;height:700px;border:1px solid var(--border)}
+.cal-box iframe{width:100%;height:100%;border:0;display:block}
+.cal-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
   background:var(--card);color:var(--muted);text-align:center;padding:30px}
 .alt{margin-top:22px;font-size:.92rem;color:var(--muted)}
 .alt a{color:var(--blue2)}
@@ -217,7 +217,7 @@ footer{border-top:1px solid var(--border);padding:36px 0;color:var(--dim);font-s
       <div class="vsl-frame" id="vsl">
         <div class="vsl-empty"><div class="play"></div><span>Video coming soon</span></div>
       </div>
-      <p class="vsl-cap">Watch the 2-minute breakdown: where DTC brands leak repeat revenue, and how we plug it.</p>
+      <p class="vsl-cap">Watch the 90-second breakdown: where DTC brands leak repeat revenue, and how we plug it.</p>
     </div>
   </header>
 
@@ -411,8 +411,8 @@ footer{border-top:1px solid var(--border);padding:36px 0;color:var(--dim);font-s
 <script>
 /* ============ EDIT THESE ============ */
 const CONFIG = {
-  CALENDLY_URL: "https://calendly.com/trevor-penmark/free-audit-call",            // e.g. "https://calendly.com/penmark/intro-call"
-  VSL_YOUTUBE_ID: "  fy5Z-QdW38c",          // e.g. "rxciEkJZD_E" (the part after v= in the YouTube link)
+  CALENDLY_URL: "https://calendly.com/trevor-penmark/free-audit-call",
+  VSL_YOUTUBE_ID: "fy5Z-QdW38c",
   CONTACT_EMAIL: "hello@penmark.agency",
   BRAND_COLOR: "2f7bff"        // Calendly accent color, no #
 };
@@ -421,7 +421,8 @@ const CONFIG = {
 // VSL
 if (CONFIG.VSL_YOUTUBE_ID) {
   document.getElementById("vsl").innerHTML =
-        `<iframe src="https://www.youtube.com/embed/${CONFIG.VSL_YOUTUBE_ID}?rel=0&modestbranding=1&playsinline=1" referrerpolicy="strict-origin-when-cross-origin"
+    `<iframe src="https://www.youtube.com/embed/${CONFIG.VSL_YOUTUBE_ID}?rel=0&modestbranding=1&playsinline=1" referrerpolicy="strict-origin-when-cross-origin"
+      title="Penmark breakdown" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
 }
 
 // Email
@@ -431,9 +432,9 @@ mail.href = "mailto:" + CONFIG.CONTACT_EMAIL; mail.textContent = CONFIG.CONTACT_
 // Calendly
 function calUrl() {
   const sep = CONFIG.CALENDLY_URL.includes("?") ? "&" : "?";
-  return CONFIG.CALENDLY_URL + sep + "hide_gdpr_banner=1&primary_color=" + CONFIG.BRAND_COLOR;
+  return CONFIG.CALENDLY_URL + sep + "hide_gdpr_banner=1&hide_event_type_details=1&hide_landing_page_details=1&primary_color=" + CONFIG.BRAND_COLOR;
 }
-if (CONFIG.CALENDLY_URL) {
+if (CONFIG.CALENDLY_URL && CONFIG.CALENDLY_URL.startsWith("http")) {
   const s = document.createElement("script");
   s.src = "https://assets.calendly.com/assets/external/widget.js";
   s.async = true;
@@ -441,7 +442,6 @@ if (CONFIG.CALENDLY_URL) {
     const box = document.getElementById("cal-box");
     box.innerHTML = "";
     Calendly.initInlineWidget({ url: calUrl(), parentElement: box });
-    box.firstElementChild && (box.firstElementChild.style.height = "700px");
   };
   document.head.appendChild(s);
 }
@@ -450,7 +450,7 @@ if (CONFIG.CALENDLY_URL) {
 document.querySelectorAll("[data-book]").forEach(btn => {
   btn.addEventListener("click", e => {
     document.getElementById("nav").classList.remove("open");
-    if (CONFIG.CALENDLY_URL && window.Calendly) {
+    if (CONFIG.CALENDLY_URL.startsWith("http") && window.Calendly) {
       e.preventDefault();
       Calendly.initPopupWidget({ url: calUrl() });
     }

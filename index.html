@@ -163,18 +163,37 @@ details[open] summary::after{transform:rotate(45deg)}
 details p{color:var(--muted);padding-bottom:20px}
 
 /* booking */
-.book{display:grid;grid-template-columns:.8fr 1.2fr;gap:36px;align-items:start}
-@media(max-width:900px){.book{grid-template-columns:1fr}}
+.book{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+@media(max-width:900px){.book{grid-template-columns:1fr;gap:40px}}
 .book-copy h2{text-align:left}
-.book-copy p{color:var(--muted);margin-top:14px}
-.book-copy .ticks{margin:24px 0 30px}
-.book-copy .ticks li::before{content:"✓";background:rgba(47,123,255,.18);color:var(--blue2)}
-.cal-box{background:#fff;border-radius:var(--r);overflow:hidden;height:700px;border:1px solid var(--border)}
-.cal-box iframe{width:100%;height:100%;border:0;display:block}
-.cal-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
-  background:var(--card);color:var(--muted);text-align:center;padding:30px}
-.alt{margin-top:22px;font-size:.92rem;color:var(--muted)}
-.alt a{color:var(--blue2)}
+.book-copy p{color:var(--muted);margin-top:14px;max-width:460px}
+.dots{list-style:none;margin:26px 0 30px;display:grid;gap:14px}
+.dots li{display:flex;align-items:center;gap:12px;color:#c9d2ea;font-size:.98rem}
+.dots li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--blue);flex:none}
+.cal-link{color:var(--blue2);font-weight:600}
+.cal-link:hover{color:var(--text)}
+.alt{margin-top:14px;font-size:.9rem;color:var(--dim)}
+.alt a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+
+.cal{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;
+  width:100%;max-width:500px;justify-self:end;box-shadow:0 30px 80px -40px rgba(47,123,255,.35)}
+@media(max-width:900px){.cal{justify-self:stretch;max-width:none}}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.cal-month{font-weight:600;font-size:1.05rem}
+.cal-nav{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:transparent;
+  color:var(--muted);display:grid;place-items:center;cursor:pointer;transition:border-color .15s,color .15s}
+.cal-nav:hover:not(:disabled){border-color:var(--blue);color:var(--text)}
+.cal-nav:disabled{opacity:.3;cursor:default}
+.cal-nav svg{width:14px;height:14px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.cal-dow span{font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-bottom:8px}
+.cal-day{height:40px;border:0;border-radius:8px;background:transparent;color:var(--text);
+  font:500 .92rem var(--body);cursor:pointer;transition:background .15s}
+.cal-day:hover:not(:disabled){background:rgba(47,123,255,.16)}
+.cal-day.today{background:var(--blue);color:#fff;font-weight:700}
+.cal-day.today:hover{background:var(--blue2)}
+.cal-day:disabled{color:#2b3656;cursor:default}
+.cal-foot{border-top:1px solid var(--border);margin-top:18px;padding-top:16px;text-align:center;color:var(--muted);font-size:.85rem}
 
 /* final cta */
 .final{text-align:center;padding:110px 0;border-top:1px solid var(--border)}
@@ -374,19 +393,25 @@ footer{border-top:1px solid var(--border);padding:36px 0;color:var(--dim);font-s
       <div class="book-copy">
         <span class="kicker">Book a call</span>
         <h2>Let's look at your email revenue</h2>
-        <p>Pick a time. I'll look at your current Klaviyo setup and tell you straight where the repeat revenue is leaking.</p>
-        <ul class="ticks">
+        <p>Pick a day. I'll look at your current Klaviyo setup and tell you straight where the repeat revenue is leaking.</p>
+        <ul class="dots">
           <li>20-minute call</li>
           <li>Free flow audit included</li>
           <li>No pitch deck, no commitment</li>
         </ul>
+        <a href="#book" class="cal-link" id="cal-link" data-book>Book on Calendly →</a>
         <p class="alt">Prefer email? <a id="mail-link" href="mailto:hello@penmark.agency">hello@penmark.agency</a></p>
       </div>
-      <div class="cal-box" id="cal-box">
-        <div class="cal-empty">
-          <h3 style="color:var(--text)">Booking calendar</h3>
-          <p>Add your Calendly link in CONFIG to show your calendar here.</p>
+
+      <div class="cal" id="cal">
+        <div class="cal-head">
+          <button class="cal-nav" id="cal-prev" aria-label="Previous month"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg></button>
+          <div class="cal-month" id="cal-month" aria-live="polite"></div>
+          <button class="cal-nav" id="cal-next" aria-label="Next month"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg></button>
         </div>
+        <div class="cal-grid cal-dow" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+        <div class="cal-grid" id="cal-days"></div>
+        <div class="cal-foot">All times in your local timezone</div>
       </div>
     </div>
   </section>
@@ -430,30 +455,64 @@ const mail = document.getElementById("mail-link");
 mail.href = "mailto:" + CONFIG.CONTACT_EMAIL; mail.textContent = CONFIG.CONTACT_EMAIL;
 
 // Calendly
-function calUrl() {
+const HAS_CAL = CONFIG.CALENDLY_URL.startsWith("http");
+function calUrl(date) {
   const sep = CONFIG.CALENDLY_URL.includes("?") ? "&" : "?";
-  return CONFIG.CALENDLY_URL + sep + "hide_gdpr_banner=1&hide_event_type_details=1&hide_landing_page_details=1&primary_color=" + CONFIG.BRAND_COLOR;
+  let url = CONFIG.CALENDLY_URL + sep + "hide_gdpr_banner=1&primary_color=" + CONFIG.BRAND_COLOR;
+  if (date) url += "&month=" + date.slice(0, 7) + "&date=" + date;
+  return url;
 }
-if (CONFIG.CALENDLY_URL && CONFIG.CALENDLY_URL.startsWith("http")) {
+function openBooking(date) {
+  if (!HAS_CAL) { document.getElementById("book").scrollIntoView(); return; }
+  if (window.Calendly) Calendly.initPopupWidget({ url: calUrl(date) });
+  else window.open(calUrl(date), "_blank", "noopener");
+}
+if (HAS_CAL) {
   const s = document.createElement("script");
   s.src = "https://assets.calendly.com/assets/external/widget.js";
   s.async = true;
-  s.onload = () => {
-    const box = document.getElementById("cal-box");
-    box.innerHTML = "";
-    Calendly.initInlineWidget({ url: calUrl(), parentElement: box });
-  };
   document.head.appendChild(s);
+  document.getElementById("cal-link").href = CONFIG.CALENDLY_URL;
 }
 
-// Every "Book a call" button opens the Calendly popup; falls back to scrolling to #book
+// Custom calendar: clicking a day opens Calendly on that date
+const today = new Date(); today.setHours(0, 0, 0, 0);
+let viewY = today.getFullYear(), viewM = today.getMonth();
+const pad = n => String(n).padStart(2, "0");
+function renderCal() {
+  const startDow = new Date(viewY, viewM, 1).getDay();
+  const days = new Date(viewY, viewM + 1, 0).getDate();
+  document.getElementById("cal-month").textContent =
+    new Date(viewY, viewM, 1).toLocaleString("en-US", { month: "long", year: "numeric" });
+  document.getElementById("cal-prev").disabled =
+    viewY === today.getFullYear() && viewM === today.getMonth();
+  let html = "<span></span>".repeat(startDow);
+  for (let d = 1; d <= days; d++) {
+    const date = new Date(viewY, viewM, d);
+    const iso = viewY + "-" + pad(viewM + 1) + "-" + pad(d);
+    const past = date < today, isToday = date.getTime() === today.getTime();
+    const label = date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+    html += `<button class="cal-day${isToday ? " today" : ""}" data-date="${iso}" ${past ? "disabled" : ""} aria-label="${label}">${d}</button>`;
+  }
+  document.getElementById("cal-days").innerHTML = html;
+}
+document.getElementById("cal-days").addEventListener("click", e => {
+  const b = e.target.closest(".cal-day");
+  if (b && !b.disabled) openBooking(b.dataset.date);
+});
+document.getElementById("cal-prev").addEventListener("click", () => {
+  if (--viewM < 0) { viewM = 11; viewY--; } renderCal();
+});
+document.getElementById("cal-next").addEventListener("click", () => {
+  if (++viewM > 11) { viewM = 0; viewY++; } renderCal();
+});
+renderCal();
+
+// Every "Book a call" button opens the Calendly popup
 document.querySelectorAll("[data-book]").forEach(btn => {
   btn.addEventListener("click", e => {
     document.getElementById("nav").classList.remove("open");
-    if (CONFIG.CALENDLY_URL.startsWith("http") && window.Calendly) {
-      e.preventDefault();
-      Calendly.initPopupWidget({ url: calUrl() });
-    }
+    if (HAS_CAL) { e.preventDefault(); openBooking(); }
   });
 });
 document.querySelectorAll(".links a").forEach(a => a.addEventListener("click", () =>
